@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Single Player Quiz Game</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .question {
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+    .answers {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    .answer {
+      margin: 0 10px;
+      padding: 10px 20px;
+      cursor: pointer;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      transition: background-color 0.3s;
+    }
+    .answer:hover {
+      background-color: #f0f0f0;
+    }
+    .score {
+      font-size: 20px;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="question" id="question"></div>
+    <div class="answers" id="answers"></div>
+    <div class="score" id="score">HP: 5</div>
+  </div>
+
+  <script>
+    const questions = [
+      {
+        question: "Столиця України?",
+        answers: ["Київ", "Дніпро", "Харків", "Львів"],
+        correctAnswer: "Дніпро"
+      },
+      {
+        question: "Коли почалася Друга світова?",
+        answers: ["1939", "1940", "1941", "1944"],
+        correctAnswer: "1939"
+      },
+      {
+        question: "Коли розпався совок?",
+        answers: ["1991", "1990", "1993", "2000"],
+        correctAnswer: "1991"
+      },
+      {
+        question: "Коли я найду дівчину?",
+        answers: ["Ніколи", "Завтра", "Я гей", "Сам ти гей"],
+        correctAnswer: "Завтра"
+      },
+      {
+        question: "Шо ти?",
+        answers: ["Та нішо", "Та нішо, а ти шо?", "Не я", "Ладно"],
+        correctAnswer: "Ладно"
+      },
+      {
+        question: "Чому Папіч піздатий?",
+        answers: ["Хз", "Даун", "Я не знаю", "НИИИИАА"],
+        correctAnswer: "Даун"
+      }
+      // Add more questions here
+    ];
+
+    let currentQuestionIndex = 0;
+    let score = 5;
+
+    const questionElement = document.getElementById("question");
+    const answersElement = document.getElementById("answers");
+    const scoreElement = document.getElementById("score");
+
+    function displayQuestion() {
+      const question = questions[currentQuestionIndex];
+      questionElement.textContent = question.question;
+      answersElement.innerHTML = "";
+      question.answers.forEach(answer => {
+        const answerElement = document.createElement("div");
+        answerElement.classList.add("answer");
+        answerElement.textContent = answer;
+        answerElement.addEventListener("click", () => checkAnswer(answer));
+        answersElement.appendChild(answerElement);
+      });
+      setTimeout(checkAnswer, 10000); // 10 seconds timeout
+    }
+
+    function checkAnswer(selectedAnswer) {
+      const question = questions[currentQuestionIndex];
+      if (!selectedAnswer || selectedAnswer !== question.correctAnswer) {
+        score--;
+        scoreElement.textContent = `HP: ${score}`;
+      }
+
+      currentQuestionIndex++;
+      if (currentQuestionIndex < questions.length && score > 0) {
+        displayQuestion();
+      } else {
+        endGame();
+      }
+    }
+
+    function endGame() {
+      if (score > 0) {
+        alert("Congratulations! You won!");
+      } else {
+        alert("Game over! You lost.");
+      }
+    }
+
+    displayQuestion();
+  </script>
+</body>
+</html>
+
