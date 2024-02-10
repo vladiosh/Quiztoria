@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Single Player Quiz Game</title>
   <style>
+    /* CSS стилі для розміщення елементів та їх вигляду */
     body {
       font-family: Arial, sans-serif;
       text-align: center;
@@ -37,96 +38,209 @@
       font-size: 20px;
       margin-bottom: 20px;
     }
+    .timer {
+      font-size: 20px;
+      margin-bottom: 20px;
+    }
+    .result {
+      text-align: left;
+      margin-top: 20px;
+    }
+    .play-again {
+      margin-top: 20px;
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      text-decoration: none;
+    }
+    .play-again:hover {
+      background-color: #45a049;
+    }
+    .question-counter {
+      font-size: 18px;
+      margin-bottom: 20px;
+    }
   </style>
 </head>
 <body>
   <div class="container">
+    <!-- Місце для відображення питання -->
     <div class="question" id="question"></div>
+    <!-- Місце для відображення таймера -->
+    <div class="timer" id="timer">Time: 10</div>
+    <!-- Місце для відображення варіантів відповідей -->
     <div class="answers" id="answers"></div>
+    <!-- Місце для відображення кількості життів -->
     <div class="score" id="score">HP: 5</div>
+    <!-- Місце для відображення результатів -->
+    <div class="result" id="result" style="display: none;"></div>
+    <!-- Місце для відображення лічильника питань -->
+    <div class="question-counter" id="question-counter"></div>
   </div>
 
   <script>
+    // Масив з питаннями та відповідями
     const questions = [
       {
-        question: "Столиця України?",
-        answers: ["Київ", "Дніпро", "Харків", "Львів"],
-        correctAnswer: "Дніпро"
+        question: "What is the capital of France?",
+        answers: ["Paris", "London", "Berlin", "Rome"],
+        correctAnswer: "Paris"
       },
       {
-        question: "Коли почалася Друга світова?",
-        answers: ["1939", "1940", "1941", "1944"],
-        correctAnswer: "1939"
+        question: "What is the largest planet in our solar system?",
+        answers: ["Jupiter", "Mars", "Earth", "Saturn"],
+        correctAnswer: "Jupiter"
       },
       {
-        question: "Коли розпався совок?",
-        answers: ["1991", "1990", "1993", "2000"],
-        correctAnswer: "1991"
+        question: "Who wrote 'To Kill a Mockingbird'?",
+        answers: ["Mark Twain", "Harper Lee", "J.K. Rowling", "Stephen King"],
+        correctAnswer: "Harper Lee"
       },
       {
-        question: "Коли я найду дівчину?",
-        answers: ["Ніколи", "Завтра", "Я гей", "Сам ти гей"],
-        correctAnswer: "Завтра"
+        question: "What year did World War I begin?",
+        answers: ["1914", "1918", "1939", "1945"],
+        correctAnswer: "1914"
       },
       {
-        question: "Шо ти?",
-        answers: ["Та нішо", "Та нішо, а ти шо?", "Не я", "Ладно"],
-        correctAnswer: "Ладно"
+        question: "Which country won the first FIFA World Cup in 1930?",
+        answers: ["Brazil", "Italy", "Uruguay", "Germany"],
+        correctAnswer: "Uruguay"
       },
       {
-        question: "Чому Папіч піздатий?",
-        answers: ["Хз", "Даун", "Я не знаю", "НИИИИАА"],
-        correctAnswer: "Даун"
+        question: "Who painted the Mona Lisa?",
+        answers: ["Vincent van Gogh", "Leonardo da Vinci", "Pablo Picasso", "Michelangelo"],
+        correctAnswer: "Leonardo da Vinci"
+      },
+      {
+        question: "Which element has the chemical symbol 'H'?",
+        answers: ["Hydrogen", "Helium", "Carbon", "Oxygen"],
+        correctAnswer: "Hydrogen"
+      },
+      {
+        question: "Who developed the theory of relativity?",
+        answers: ["Albert Einstein", "Isaac Newton", "Galileo Galilei", "Stephen Hawking"],
+        correctAnswer: "Albert Einstein"
+      },
+      {
+        question: "What is the world's largest ocean?",
+        answers: ["Atlantic Ocean", "Indian Ocean", "Arctic Ocean", "Pacific Ocean"],
+        correctAnswer: "Pacific Ocean"
+      },
+      {
+        question: "Which planet is known as the 'Red Planet'?",
+        answers: ["Jupiter", "Mars", "Venus", "Mercury"],
+        correctAnswer: "Mars"
       }
-      // Add more questions here
     ];
 
+    // Ініціалізація змінних для ведення лічильника питань, життів та часу
     let currentQuestionIndex = 0;
     let score = 5;
+    let timeLeft = 10; // Початковий час
+    let timerInterval; // Зберігає ідентифікатор таймера
 
+    // Отримання елементів DOM для маніпулювання ними
     const questionElement = document.getElementById("question");
     const answersElement = document.getElementById("answers");
     const scoreElement = document.getElementById("score");
+    const timerElement = document.getElementById("timer");
+    const resultElement = document.getElementById("result");
+    const questionCounterElement = document.getElementById("question-counter");
 
+    // Функція для відображення поточного питання та варіантів відповідей
     function displayQuestion() {
       const question = questions[currentQuestionIndex];
       questionElement.textContent = question.question;
       answersElement.innerHTML = "";
+      // Додаємо кнопки з варіантами відповідей
       question.answers.forEach(answer => {
         const answerElement = document.createElement("div");
         answerElement.classList.add("answer");
         answerElement.textContent = answer;
+        // Додаємо обробник подій для кожного варіанту відповіді
         answerElement.addEventListener("click", () => checkAnswer(answer));
         answersElement.appendChild(answerElement);
       });
-      setTimeout(checkAnswer, 10000); // 10 seconds timeout
+
+      // Оновлення лічильника питань
+      questionCounterElement.textContent = `Question ${currentQuestionIndex + 1}/${questions.length}`;
+      // Запускаємо таймер для обмеження часу на відповідь
+      startTimer();
     }
 
+    // Функція для запуску таймера
+    function startTimer() {
+      timeLeft = 10; // Встановлюємо початковий час
+      timerElement.textContent = `Time: ${timeLeft}`; // Відображаємо початковий час
+      clearInterval(timerInterval); // Зупиняємо попередній таймер, якщо він був запущений
+      timerInterval = setInterval(() => {
+        timeLeft--; // Зменшуємо залишений час
+        timerElement.textContent = `Time: ${timeLeft}`; // Оновлюємо відображення часу
+        if (timeLeft === 0) { // Якщо час вичерпано
+          clearInterval(timerInterval); // Зупиняємо таймер
+          checkAnswer(); // Перевіряємо відповідь
+        }
+      }, 1000); // Оновлюємо таймер кожну секунду
+    }
+
+    // Функція для перевірки відповіді
     function checkAnswer(selectedAnswer) {
       const question = questions[currentQuestionIndex];
       if (!selectedAnswer || selectedAnswer !== question.correctAnswer) {
-        score--;
-        scoreElement.textContent = `HP: ${score}`;
+        score--; // Зменшуємо кількість життів при неправильній відповіді
+        scoreElement.textContent = `HP: ${score}`; // Оновлюємо відображення кількості життів
       }
 
-      currentQuestionIndex++;
+      currentQuestionIndex++; // Переходимо до наступного питання
       if (currentQuestionIndex < questions.length && score > 0) {
-        displayQuestion();
+        displayQuestion(); // Показуємо наступне питання
       } else {
-        endGame();
+        endGame(); // Якщо всі питання відповідно дали або кількість життів вичерпано, завершуємо гру
       }
     }
 
+    // Функція для завершення гри
     function endGame() {
+      clearInterval(timerInterval); // Зупиняємо таймер
+
       if (score > 0) {
-        alert("Congratulations! You won!");
+        resultElement.innerHTML = "<h2>You Won!</h2>";
       } else {
-        alert("Game over! You lost.");
+        resultElement.innerHTML = "<h2>You Lost!</h2>";
       }
+      const resultList = document.createElement("ul");
+      // Перебираємо питання та додаємо тільки ті, на які було відповідено правильно
+      for (let i = 0; i < currentQuestionIndex; i++) {
+        const question = questions[i];
+        const listItem = document.createElement("li");
+        listItem.textContent = `${question.question} - Correct Answer: ${question.correctAnswer}`;
+        resultList.appendChild(listItem);
+      }
+      resultElement.appendChild(resultList);
+      resultElement.style.display = "block";
+      // Сховати інші елементи
+      questionElement.style.display = "none";
+      answersElement.style.display = "none";
+      scoreElement.style.display = "none";
+      timerElement.style.display = "none";
+      // Видаляємо лічильник питань з фінального екрану
+      questionCounterElement.style.display = "none";
+      // Додати кнопку "Play Again"
+      const playAgainButton = document.createElement("button");
+      playAgainButton.textContent = "Play Again";
+      playAgainButton.classList.add("play-again");
+      playAgainButton.onclick = function() {
+        window.location.reload(); // Перезавантажити сторінку для початку нової гри
+      };
+      resultElement.appendChild(playAgainButton);
     }
 
+    // Початок гри
     displayQuestion();
   </script>
 </body>
 </html>
-
